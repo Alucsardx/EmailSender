@@ -10,6 +10,7 @@ using EmailSender.Services;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Ocsp;
 
 namespace EmailSender.Controllers
 {
@@ -22,6 +23,7 @@ namespace EmailSender.Controllers
     {
         private AppEmailService _emailService;
         private IConverter _converter;
+        private static string _info = "";
 
 
         public MailController(AppEmailService emailService, IConverter converter)
@@ -30,41 +32,55 @@ namespace EmailSender.Controllers
             _converter = converter;
         }
 
+        [HttpPost]
+        [Route("userInfo")]
+        public void UserInformation([FromBody] Info info)
+        {
+            _info = info.UserInfo;
+        }
+
         [HttpPost, DisableRequestSizeLimit]
         [Route("sendMail")]
         public void SendMail()
         {
-            var file = Request.Form.Files[0];
-            var user = Request.Form.Files[1];
-
-            var globalSettings = new GlobalSettings
+            try
             {
-                ColorMode = ColorMode.Color,
-                Orientation = Orientation.Portrait,
-                PaperSize = PaperKind.A4,
-                Margins = new MarginSettings { Top = 10 },
-                DocumentTitle = "PDF Report",
-                Out = @"D:\PDFCreator\Employee_Report.pdf"
-            };
-
-            var objectSettings = new ObjectSettings
+                var file = Request.Form.Files[0];
+                _emailService.SendMail(file, _info);
+            }
+            catch (Exception e)
             {
-                PagesCount = true,
-                //HtmlContent = UserInfoToPDF.GetHTMLString(userInfo),
-                WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
-                HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
-                FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
-            };
+                
+            }
+            //var user = Request.Form.Files[1];
 
-            var pdf = new HtmlToPdfDocument()
-            {
-                GlobalSettings = globalSettings,
-                Objects = { objectSettings }
-            };
+            //var globalSettings = new GlobalSettings
+            //{
+            //    ColorMode = ColorMode.Color,
+            //    Orientation = Orientation.Portrait,
+            //    PaperSize = PaperKind.A4,
+            //    Margins = new MarginSettings { Top = 10 },
+            //    DocumentTitle = "PDF Report",
+            //    Out = @"D:\PDFCreator\Employee_Report.pdf"
+            //};
 
-            var userPdf= _converter.Convert(pdf);
+            //var objectSettings = new ObjectSettings
+            //{
+            //    PagesCount = true,
+            //    //HtmlContent = UserInfoToPDF.GetHTMLString(userInfo),
+            //    WebSettings = { DefaultEncoding = "utf-8", UserStyleSheet = Path.Combine(Directory.GetCurrentDirectory(), "assets", "styles.css") },
+            //    HeaderSettings = { FontName = "Arial", FontSize = 9, Right = "Page [page] of [toPage]", Line = true },
+            //    FooterSettings = { FontName = "Arial", FontSize = 9, Line = true, Center = "Report Footer" }
+            //};
 
-            _emailService.SendMail(file, userPdf);
+            //var pdf = new HtmlToPdfDocument()
+            //{
+            //    GlobalSettings = globalSettings,
+            //    Objects = { objectSettings }
+            //};
+
+            //var userPdf= _converter.Convert(pdf);
+
         }
     }
 }

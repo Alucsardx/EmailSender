@@ -8,7 +8,7 @@ namespace EmailSender.Services
 {
     public class AppEmailService
     {
-        public async Task SendMail(IFormFile file, byte[] userPdf)
+        public async Task SendMail(IFormFile file, string info)
         {
             MimeMessage message = new MimeMessage();
 
@@ -24,8 +24,8 @@ namespace EmailSender.Services
             message.Subject = "Hack Registration";
 
             BodyBuilder bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = "<h1>Hello World!</h1>";
-            bodyBuilder.TextBody = "Hello World!";
+            bodyBuilder.HtmlBody = $"<h1>{info}</h1>";
+            bodyBuilder.TextBody = info;
 
             await using (MemoryStream memoryStream = new MemoryStream())
             {
