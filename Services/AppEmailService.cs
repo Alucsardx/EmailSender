@@ -17,8 +17,8 @@ namespace EmailSender.Services
 
             message.From.Add(from);
 
-            MailboxAddress to = new MailboxAddress("User",
-                "djanj13@freeuni.edu.ge");
+            MailboxAddress to = new MailboxAddress("Demlab",
+                "info@demlab.ge");
             message.To.Add(to);
 
             message.Subject = "Hack Registration";
